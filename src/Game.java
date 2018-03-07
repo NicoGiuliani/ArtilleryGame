@@ -6,14 +6,15 @@ import java.util.Scanner;
 public class Game {
     private static int playerWins = 0;
     private static int computerWins = 0;
+    private static double marginOfError = 0.1;
 
     public static void main(String[] args) {
         // playGame returns false if the user chooses to play no additional rounds, stopping the while loop
         while (playGame());
 
-        // These messages are displayed once the user chooses not to play any additional rounds
+        // These messages are displayed once the user chooses not to play any additional rounds, showing the number and percentage of wins
         System.out.println("\nPlayer wins: " + playerWins + "\nComputer wins: " + computerWins);
-        System.out.println("You won " + roundTwoPlaces(playerWins / (playerWins + computerWins)) * 100 + "% of the games played.");
+        System.out.println("You won " + roundTwoPlaces((double) playerWins / (double) (playerWins + computerWins)) * 100 + "% of the games played.");
     }
 
     // Returns a random int between the min and max values passed in
@@ -28,67 +29,93 @@ public class Game {
         return (Math.pow(speed, 2) * Math.sin(2 * theta)) / 9.8;
     }
 
+    // Returns a double rounded to two decimal places
     private static double roundTwoPlaces(double number) {
         DecimalFormat df = new DecimalFormat("#.##");
         return Double.parseDouble(df.format(number));
     }
 
-    // The computer will fire a shell at a random angle and speed; it will return false if it strikes its target
-    private static boolean computerTurn(int[] enemyRange) {
+    // The computer takes a turn firing a shell at player 1; it will return false if it strikes its target
+    private static boolean computerTurn(int[] enemyRange, int enemyDistance) {
         Scanner scan = new Scanner(System.in);
-        String degreesSign = "\u00B0";
-        int angleMin = 1;
-        int angleMax = 89;
-        int speedMin = 20;
-        int speedMax = 100;
-        int angle = generateRandom(angleMin, angleMax);
-        int speed = generateRandom(speedMin, speedMax);
+        int lowEnd = (int) (enemyDistance * (1 - marginOfError));
+        int highEnd = (int) (enemyDistance * (1 + marginOfError));
+        int distanceFromPosition;
 
-        System.out.println("\nEnemy fired at " + angle + degreesSign + " at " + speed + " m/s.");
+        // The enemy will take aim on player 1's artillery with a certain margin of error
+        int aimValue = generateRandom(lowEnd, highEnd);
+        System.out.println("\n------------------------------------------------------------");
 
-        double shellDistance = getShellDistance(angle, speed);
-        shellDistance = roundTwoPlaces(shellDistance);
-
-        int enemyDistance = (enemyRange[0] + enemyRange[1]) / 2;
-
-        double distanceFromPosition;
-        System.out.println("Its shell traveled " + shellDistance + " meters.");
-        if (shellDistance < enemyDistance) {
-            distanceFromPosition = roundTwoPlaces(enemyDistance - shellDistance);
-            System.out.print("Shell exploded " + distanceFromPosition + " meters from your position. (press any key to continue)");
-
+        if (aimValue < enemyDistance) {
+            distanceFromPosition = (int) roundTwoPlaces(enemyDistance - aimValue);
+            System.out.print("\nA shell exploded " + distanceFromPosition + " meters from your position. (press any key to continue)");
             scan.nextLine();
-        } else if (shellDistance > enemyDistance) {
-            distanceFromPosition = roundTwoPlaces(shellDistance - enemyDistance);
-            System.out.print("Shell exploded " + distanceFromPosition + " meters behind your position. (press any key to continue)");
+        } else if (aimValue > enemyDistance) {
+            distanceFromPosition = (int) roundTwoPlaces(aimValue - enemyDistance);
+            System.out.print("\nA shell exploded " + distanceFromPosition + " meters behind your position. (press any key to continue)");
             scan.nextLine();
         }
 
-        if (shellDistance >= enemyRange[0] && shellDistance <= enemyRange[1]) {
+        if (aimValue >= enemyRange[0] && aimValue <= enemyRange[1]) {
             System.out.println("Your artillery was destroyed.");
             computerWins++;
             return false;
-        }
-        return true;
+        } else return true;
+
     }
 
     // The player will enter an angle and speed at which to fire a shell; it will return false if the player wins
     private static boolean playerTurn(int[] enemyRange) {
         Scanner scan = new Scanner(System.in);
         int enemyDistance = (enemyRange[0] + enemyRange[1]) / 2;
+        double angle = 0;
+        double speed = 0;
+        boolean invalidInput;
 
+        System.out.println("\n------------------------------------------------------------");
         System.out.println("\nEnemy artillery is at approximately " + enemyDistance + " meter(s).");
-        System.out.println("\nEnemy range is between " + enemyRange[0] + " meters(s) and " + enemyRange[1] + " meter(s).");
+        System.out.println("Enemy range is between " + enemyRange[0] + " and " + enemyRange[1] + " meter(s).");
 
-        System.out.print("Enter an angle in degrees: ");
-        double angle = Double.parseDouble(scan.nextLine());
-        System.out.print("Enter a speed: ");
-        double speed = Double.parseDouble(scan.nextLine());
+        do {
+            try {
+                System.out.print("\nEnter an angle in degrees: ");
+                angle = Double.parseDouble(scan.nextLine());
 
-        double shellDistance = getShellDistance(angle, speed);
-        shellDistance = roundTwoPlaces(shellDistance);
+                if (angle > 89 || angle < 1) {
+                    invalidInput = true;
+                    System.out.println("Input must be an angle between 0 and 90 degrees.");
+                } else {
+                    invalidInput = false;
+                }
 
-        System.out.print("\nShell exploded at " + shellDistance + " meters. (press any key to continue)");
+            } catch (NumberFormatException nfe) {
+                System.out.println("Input must be an angle between 0 and 90 degrees.");
+                invalidInput = true;
+            }
+
+        } while (invalidInput);
+
+        do {
+            try {
+                System.out.print("\nEnter a speed in m/s: ");
+                speed = Double.parseDouble(scan.nextLine());
+
+                if (speed > 300 || speed < 1) {
+                    invalidInput = true;
+                    System.out.println("Speed must be between 0 and 300 m/s.");
+                } else {
+                    invalidInput = false;
+                }
+
+            } catch (NumberFormatException nfe) {
+                System.out.println("Input must be an speed between 0 and 300 meters per second.");
+                invalidInput = true;
+            }
+
+        } while (invalidInput);
+
+        double shellDistance = roundTwoPlaces(getShellDistance(angle, speed));
+        System.out.print("\nThe shell exploded at " + shellDistance + " meters. (press any key to continue)");
         scan.nextLine();
 
         if (shellDistance >= enemyRange[0] && shellDistance <= enemyRange[1]) {
@@ -110,7 +137,7 @@ public class Game {
         while (true) {
             // If during either player's turn the other's artillery is destroyed, the methods return false.
             if (!playerTurn(enemyRange)) { break; }
-            else if (!computerTurn(enemyRange)) { break; }
+            else if (!computerTurn(enemyRange, enemyDistance)) { break; }
         }
 
         System.out.print("Would you like to play again? ( Y / N ) ");
