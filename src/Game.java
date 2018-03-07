@@ -6,7 +6,8 @@ import java.util.Scanner;
 public class Game {
     private static int playerWins = 0;
     private static int computerWins = 0;
-    private static double marginOfError = 0.1;
+    private static double marginOfError = 0.4;
+    private static int numberOfTurns = 0;
 
     public static void main(String[] args) {
         // playGame returns false if the user chooses to play no additional rounds, stopping the while loop
@@ -38,8 +39,8 @@ public class Game {
     // The computer takes a turn firing a shell at player 1; it will return false if it strikes its target
     private static boolean computerTurn(int[] enemyRange, int enemyDistance) {
         Scanner scan = new Scanner(System.in);
-        int lowEnd = (int) (enemyDistance * (1 - marginOfError));
-        int highEnd = (int) (enemyDistance * (1 + marginOfError));
+        int lowEnd = (int) (enemyDistance * (1.0 - marginOfError));
+        int highEnd = (int) (enemyDistance * (1.0 + marginOfError));
         int distanceFromPosition;
 
         // The enemy will take aim on player 1's artillery with a certain margin of error
@@ -56,11 +57,26 @@ public class Game {
             scan.nextLine();
         }
 
+
+
         if (aimValue >= enemyRange[0] && aimValue <= enemyRange[1]) {
             System.out.println("Your artillery was destroyed.");
             computerWins++;
             return false;
-        } else return true;
+        } else {
+            System.out.println("The margin of error in this shot was " + marginOfError);
+
+            if (numberOfTurns < 3) {
+                marginOfError = (marginOfError * 10 - 1) / 10;
+            }
+            else if (numberOfTurns < 8) {
+                marginOfError = (marginOfError * 100 - 1) / 100;
+            }
+            System.out.println("The margin of error of the next shot will be " + marginOfError);
+            numberOfTurns++;
+
+            return true;
+        }
 
     }
 
@@ -140,6 +156,8 @@ public class Game {
             else if (!computerTurn(enemyRange, enemyDistance)) { break; }
         }
 
+        marginOfError = 0.4;
+        numberOfTurns = 0;
         System.out.print("Would you like to play again? ( Y / N ) ");
         String response = scan.next();
         return response.equalsIgnoreCase("y");
