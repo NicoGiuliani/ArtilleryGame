@@ -6,8 +6,8 @@ import java.util.Scanner;
 public class Game {
     private static int playerWins = 0;
     private static int computerWins = 0;
-    private static double marginOfError = 0.4;
     private static int numberOfTurns = 0;
+    private static double marginOfError = 0.4;
 
     public static void main(String[] args) {
         // playGame returns false if the user chooses to play no additional rounds, stopping the while loop
@@ -57,8 +57,6 @@ public class Game {
             scan.nextLine();
         }
 
-
-
         if (aimValue >= enemyRange[0] && aimValue <= enemyRange[1]) {
             System.out.println("Your artillery was destroyed.");
             computerWins++;
@@ -103,12 +101,10 @@ public class Game {
                 } else {
                     invalidInput = false;
                 }
-
             } catch (NumberFormatException nfe) {
                 System.out.println("Input must be an angle between 0 and 90 degrees.");
                 invalidInput = true;
             }
-
         } while (invalidInput);
 
         do {
@@ -122,12 +118,10 @@ public class Game {
                 } else {
                     invalidInput = false;
                 }
-
             } catch (NumberFormatException nfe) {
                 System.out.println("Input must be an speed between 0 and 300 meters per second.");
                 invalidInput = true;
             }
-
         } while (invalidInput);
 
         double shellDistance = roundTwoPlaces(getShellDistance(angle, speed));
