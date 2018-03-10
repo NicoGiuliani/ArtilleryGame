@@ -38,8 +38,11 @@ public class Game {
 
     private static double[] angleAndTrajectory(int distance) {
         double thetaDegrees = generateRandom(5, 85);
+//        System.out.println("1) " + thetaDegrees);
         double thetaRadians = (thetaDegrees * Math.PI) / 180;
-        double speed = Math.sqrt((9.8 * distance) / Math.sin(2 * thetaRadians));
+//        System.out.println("2) " + thetaRadians);
+        double speed = Math.sqrt( (9.8 * distance) / (Math.sin(2 * thetaRadians) ) );
+//        System.out.println("3) " + speed);
         return new double[]{thetaDegrees, speed};
     }
 
@@ -53,8 +56,9 @@ public class Game {
 
         // The enemy will fire somewhere between lowEnd and highEnd.
         int aimValue = generateRandom(lowEnd, highEnd);
+        double[] shotValues = angleAndTrajectory(aimValue);
         System.out.println("\n============================================================");
-        System.out.printf("\nEnemy artillery fired %s degrees at %s m/s.\n", (int) angleAndTrajectory(aimValue)[0], angleAndTrajectory(aimValue)[1]);
+        System.out.printf("\nEnemy artillery fired %s degrees at %s m/s.\n", (int) shotValues[0], roundTwoPlaces(shotValues[1]));
 
         System.out.println("The shell travelled " + aimValue + " meters.");
 
