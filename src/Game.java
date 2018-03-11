@@ -6,16 +6,27 @@ public class Game {
     private static int playerWins = 0;
     private static int computerWins = 0;
     private static int numberOfTurns = 0;
-    private static double marginOfError = 0.4;
+    private static double marginOfError = 0.35;
 
     public static void main(String[] args) {
+        System.out.println();
+        System.out.println("    :::     ::::::::: ::::::::::: ::::::::::: :::        :::        :::::::::: :::::::::  :::   ::: ");
+        System.out.println("  :+: :+:   :+:    :+:    :+:         :+:     :+:        :+:        :+:        :+:    :+: :+:   :+: ");
+        System.out.println(" +:+   +:+  +:+    +:+    +:+         +:+     +:+        +:+        +:+        +:+    +:+  +:+ +:+  ");
+        System.out.println("+#++:++#++: +#++:++#:     +#+         +#+     +#+        +#+        +#++:++#   +#++:++#:    +#++:   ");
+        System.out.println("+#+     +#+ +#+    +#+    +#+         +#+     +#+        +#+        +#+        +#+    +#+    +#+    ");
+        System.out.println("#+#     #+# #+#    #+#    #+#         #+#     #+#        #+#        #+#        #+#    #+#    #+#    ");
+        System.out.println("###     ### ###    ###    ###     ########### ########## ########## ########## ###    ###    ###    ");
+
         // playGame() returns true if the user wants to play another round, and false if not.
         while (playGame());
 
         // Once the user chooses not to play another round, these messages will show the number and percentage of wins.
         System.out.println("\n============================================================");
         System.out.println("\nPlayer wins: " + playerWins + "\nComputer wins: " + computerWins);
-        System.out.println("You won " + (playerWins / (playerWins + computerWins) * 100) + "% of the games played.");
+        double percentageOfWins = (double) playerWins / (playerWins + computerWins) * 100;
+        System.out.println("You won " + percentageOfWins + "% of the games played.\n");
+        System.out.println(determineMessage(percentageOfWins));
     }
 
     // Returns a random int between the min and max arguments.
@@ -36,67 +47,12 @@ public class Game {
         return Double.parseDouble(df.format(number));
     }
 
+    // This method will take distance as an argument, then return a corresponding angle and speed.
     private static double[] angleAndTrajectory(int distance) {
         double thetaDegrees = generateRandom(5, 85);
-//        System.out.println("1) " + thetaDegrees);
         double thetaRadians = (thetaDegrees * Math.PI) / 180;
-//        System.out.println("2) " + thetaRadians);
         double speed = Math.sqrt( (9.8 * distance) / (Math.sin(2 * thetaRadians) ) );
-//        System.out.println("3) " + speed);
         return new double[]{thetaDegrees, speed};
-    }
-
-    // The computer takes a turn firing at player 1. It will return true if it strikes its target, false if it misses.
-    private static boolean computerTurn(Scanner scan, int[] enemyRange, int enemyDistance) {
-        int distanceFromPosition;
-
-        // These will set lowEnd to x% below the actual enemyDistance, and highEnd to x% above the actual enemyDistance.
-        int lowEnd = (int) (enemyDistance * (1.0 - marginOfError));
-        int highEnd = (int) (enemyDistance * (1.0 + marginOfError));
-
-        // The enemy will fire somewhere between lowEnd and highEnd.
-        int aimValue = generateRandom(lowEnd, highEnd);
-        double[] shotValues = angleAndTrajectory(aimValue);
-        System.out.println("\n============================================================");
-        System.out.printf("\nEnemy artillery fired %s degrees at %s m/s.\n", (int) shotValues[0], roundTwoPlaces(shotValues[1]));
-
-        System.out.println("The shell travelled " + aimValue + " meters.");
-
-        // Depending on whether the shell landed short, overshot its target, or made a direct hit, one of these messages will be shown.
-        if (aimValue < enemyDistance) {
-            distanceFromPosition = (int) roundTwoPlaces(enemyDistance - aimValue);
-            System.out.print("\nA shell exploded " + distanceFromPosition + " meters from your position. (press any key to continue)");
-            scan.nextLine();
-        } else if (aimValue > enemyDistance) {
-            distanceFromPosition = (int) roundTwoPlaces(aimValue - enemyDistance);
-            System.out.print("\nA shell exploded " + distanceFromPosition + " meters behind your position. (press any key to continue)");
-            scan.nextLine();
-        } else {
-            System.out.print("\nA shell landed directly on your position. (press any key to continue)");
-            scan.nextLine();
-        }
-
-        // If the shell lands close enough, the artillery will be destroyed.
-        if (aimValue >= enemyRange[0] && aimValue <= enemyRange[1]) {
-            System.out.println("Your artillery was destroyed.");
-            computerWins++;
-            return true;
-        } else {
-//            System.out.println("The margin of error in this shot was plus or minus " + (int) (marginOfError * 100) + "%.");
-
-            // For the first three turns, the computer's margin of error will drop by 10% each turn.
-            if (numberOfTurns < 3) {
-                marginOfError = (marginOfError * 10 - 1) / 10;
-            }
-            // For the next five turns, the computer's margin of error will drop by 1% each turn.
-            else if (numberOfTurns < 8) {
-                marginOfError = (marginOfError * 100 - 1) / 100;
-            }
-//            System.out.println("The margin of error of the next shot will be plus or minus "  + (int) (marginOfError * 100) + "%.");
-            numberOfTurns++;
-            return false;
-        }
-
     }
 
     // The player will enter an angle and a speed at which to fire a shell; it will return true if it hits its target.
@@ -115,7 +71,7 @@ public class Game {
                 System.out.print("\nEnter an angle in degrees: ");
                 angle = Double.parseDouble(scan.nextLine());
 
-                if (angle > 89 || angle < 0) {
+                if (angle > 89 || angle < 1) {
                     invalidInput = true;
                     System.out.println("Input must be an angle between 0 and 90 degrees.");
                 } else {
@@ -158,6 +114,61 @@ public class Game {
         return false;
     }
 
+    // The computer takes a turn firing at player 1. It will return true if it strikes its target, false if it misses.
+    private static boolean computerTurn(Scanner scan, int[] enemyRange, int enemyDistance) {
+        int distanceFromPosition;
+
+        // These will set lowEnd to x% below the enemyDistance, and highEnd to x% above the enemyDistance.
+        int lowEnd = (int) (enemyDistance * (1.0 - marginOfError));
+        int highEnd = (int) (enemyDistance * (1.0 + marginOfError));
+
+        // The enemy will fire somewhere between lowEnd and highEnd.
+        int aimValue = generateRandom(lowEnd, highEnd);
+
+        // Since the shell distance is determined first, the following method determines an angle and speed to match it.
+        double[] shotValues = angleAndTrajectory(aimValue);
+
+        System.out.println("\n============================================================");
+        System.out.printf("\nEnemy artillery fired %s degrees at %s m/s.\n", (int) shotValues[0], roundTwoPlaces(shotValues[1]));
+        System.out.println("The shell travelled " + aimValue + " meters.");
+
+        // Depending on whether the shell landed short, overshot its target, or made a direct hit, one of these messages will be shown.
+        if (aimValue < enemyDistance) {
+            distanceFromPosition = (int) roundTwoPlaces(enemyDistance - aimValue);
+            System.out.print("\nA shell exploded " + distanceFromPosition + " meters from your position. (press any key to continue)");
+            scan.nextLine();
+        } else if (aimValue > enemyDistance) {
+            distanceFromPosition = (int) roundTwoPlaces(aimValue - enemyDistance);
+            System.out.print("\nA shell exploded " + distanceFromPosition + " meters behind your position. (press any key to continue)");
+            scan.nextLine();
+        } else {
+            System.out.print("\nA shell landed directly on your position. (press any key to continue)");
+            scan.nextLine();
+        }
+
+        // If the shell lands close enough, the artillery will be destroyed.
+        if (aimValue >= enemyRange[0] && aimValue <= enemyRange[1]) {
+            System.out.println("Your artillery was destroyed.");
+            computerWins++;
+            return true;
+        } else {
+//            System.out.println("The margin of error in this shot was plus or minus " + (int) (marginOfError * 100) + "%.");
+
+            // For the first three turns, the computer's margin of error will drop by 10% each turn.
+            if (numberOfTurns < 3) {
+                marginOfError = (marginOfError * 10 - 1) / 10;
+            }
+            // For the next five turns, the computer's margin of error will drop by 1% each turn.
+            else if (numberOfTurns < 8) {
+                marginOfError = (marginOfError * 100 - 1) / 100;
+            }
+//            System.out.println("The margin of error of the next shot will be plus or minus "  + (int) (marginOfError * 100) + "%.");
+            numberOfTurns++;
+            return false;
+        }
+
+    }
+
     private static boolean playGame() {
         Scanner scan = new Scanner(System.in);
 
@@ -174,12 +185,24 @@ public class Game {
             else if (computerTurn(scan, enemyRange, enemyDistance)) { break; }
         }
 
-        // After the game has ended, the marginOfError is reset to 0.4 and numberOfTurns to 0.
-        marginOfError = 0.4;
+        // After the game has ended, the marginOfError is reset to 0.35 and numberOfTurns to 0.
+        marginOfError = 0.35;
         numberOfTurns = 0;
         System.out.print("Would you like to play again? ( Y / N ) ");
         String response = scan.next();
         return response.equalsIgnoreCase("y");
+    }
+
+    private static String determineMessage(double percentage) {
+        String message = "";
+        if (percentage >= 90) {
+            message = "Superb marksmanship. Finely done.";
+        } else if (percentage >= 75) {
+            message = "Not extraordinary, but not quite mediocre either. Well done.";
+        } else {
+            message = "Well what the hell happened? Were those all meant to be warning shots?";
+        }
+        return message;
     }
 
 }
