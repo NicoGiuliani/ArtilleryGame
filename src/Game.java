@@ -152,7 +152,7 @@ public class Game {
             computerWins++;
             return true;
         } else {
-//            System.out.println("The margin of error in this shot was plus or minus " + (int) (marginOfError * 100) + "%.");
+            // System.out.println("The margin of error in this shot was plus or minus " + (int) (marginOfError * 100) + "%.");
 
             // For the first three turns, the computer's margin of error will drop by 10% each turn.
             if (numberOfTurns < 3) {
@@ -162,7 +162,7 @@ public class Game {
             else if (numberOfTurns < 8) {
                 marginOfError = (marginOfError * 100 - 1) / 100;
             }
-//            System.out.println("The margin of error of the next shot will be plus or minus "  + (int) (marginOfError * 100) + "%.");
+            // System.out.println("The margin of error of the next shot will be plus or minus "  + (int) (marginOfError * 100) + "%.");
             numberOfTurns++;
             return false;
         }
@@ -194,7 +194,7 @@ public class Game {
     }
 
     private static String determineMessage(double percentage) {
-        String message = "";
+        String message;
         if (percentage >= 90) {
             message = "Superb marksmanship. Finely done.";
         } else if (percentage >= 75) {
