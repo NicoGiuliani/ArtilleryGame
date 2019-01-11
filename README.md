@@ -1,0 +1,1 @@
+In this game the player will choose a speed and angle at which to fire upon his or her opponent. If the shell lands within a certain distance of the opponent's artillery, it will explode and destroy it. After each missed shot, the opponent will return fire. 
