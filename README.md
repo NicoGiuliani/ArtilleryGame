@@ -4,4 +4,4 @@ To view this console application:
   - SSH to 50.116.13.87
   - Username: guest
   - Password: guest
-  - Once logged in, type "battleship" at the command prompt to begin
+  - Once logged in, type "artillery" at the command prompt to begin
